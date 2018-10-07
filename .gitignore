@@ -1,0 +1,9 @@
+# binary files
+/01/bootload/kzload*
+/tools/h8write/h8write
+
+# object files
+*.o
+
+# setting files
+.vscode
