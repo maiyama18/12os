@@ -62,24 +62,19 @@ static int elf_load_program(struct elf_header *header) {
 
     if (pheader->type != 1) continue;
 
-    putxval(pheader->offset, 6); puts(" ");
-    putxval(pheader->virtual_addr, 8); puts(" ");
-    putxval(pheader->physical_addr, 8); puts(" ");
-    putxval(pheader->file_size, 5); puts(" ");
-    putxval(pheader->memory_size, 5); puts(" ");
-    putxval(pheader->flags, 2); puts(" ");
-    putxval(pheader->align, 2); puts(" ");
+    memcpy((char *)pheader->physical_addr, (char *)header + pheader->offset, pheader->memory_size);
+    memset((char *)pheader->physical_addr + pheader->memory_size, 0, pheader->memory_size - pheader->file_size);
   }
 
   return 0;
 }
 
-int elf_load(char *buf) {
+char *elf_load(char *buf) {
   struct elf_header *header = (struct elf_header *)buf;
 
-  if (elf_check(header) < 0) return -1;
+  if (elf_check(header) < 0) return NULL;
 
-  if (elf_load_program(header) < 0) return -1;
+  if (elf_load_program(header) < 0) return NULL;
 
-  return 0;
+  return (char *)header->entry_point;
 }
