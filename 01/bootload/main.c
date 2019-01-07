@@ -1,6 +1,7 @@
 #include "defines.h"
 #include "serial.h"
 #include "xmodem.h"
+#include "elf.h"
 #include "lib.h"
 
 static int init(void) {
@@ -47,6 +48,8 @@ int main(void) {
   static char buf[16];
   static long size = -1;
   static unsigned char *loadbuf = NULL;
+  char *entry_point;
+  void (*f)(void);
   extern int buffer_start;
 
   init();
@@ -71,6 +74,17 @@ int main(void) {
       putxval(size, 0);
       puts("\n");
       dump(loadbuf, size);
+    } else if (!strcmp(buf, "run")) {
+      entry_point = elf_load(loadbuf);
+      if (!entry_point) {
+        puts("run error\n");
+      } else {
+        puts("starting from entry point: ");
+        putxval(entry_point, 0);
+        puts("\n");
+        f = (void (*)(void))entry_point;
+        f();
+      }
     } else {
       puts("unknown command\n");
     }
